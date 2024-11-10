@@ -13,6 +13,7 @@ public class Main {
     public static void main(String[] args) throws IOException {
         HttpServer server = HttpServer.create(new InetSocketAddress(8080), 0);
         server.createContext("/", new MyHandler());
+        server.createContext("/style.css", new CssHandler()); // CSSファイル用のコンテキストを追加
         server.setExecutor(null); // デフォルトのエグゼキュータを使用
         server.start();
     }
@@ -41,7 +42,9 @@ public class Main {
                 response = "Please provide a guess parameter, e.g., /?guess=50";
             }
 
-            String htmlResponse = "<html><body>" +
+            String htmlResponse = "<html><head>" +
+                    "<link rel='stylesheet' type='text/css' href='/style.css'>" +
+                    "</head><body>" +
                     "<h1>Guess the Number Game</h1>" +
                     "<p>" + response + "</p>" +
                     "<form method='get' action='/'>" +
@@ -54,6 +57,23 @@ public class Main {
             t.sendResponseHeaders(200, htmlResponse.length());
             OutputStream os = t.getResponseBody();
             os.write(htmlResponse.getBytes());
+            os.close();
+        }
+    }
+
+    static class CssHandler implements HttpHandler {
+        @Override
+        public void handle(HttpExchange t) throws IOException {
+            String css = "body { font-family: Arial, sans-serif; background-color: #f0f0f0; text-align: center; padding: 50px; }" +
+                         "h1 { color: #333; }" +
+                         "p { font-size: 1.2em; }" +
+                         "form { margin-top: 20px; }" +
+                         "input[type='number'] { padding: 10px; font-size: 1em; }" +
+                         "input[type='submit'] { padding: 10px 20px; font-size: 1em; background-color: #4CAF50; color: white; border: none; cursor: pointer; }" +
+                         "input[type='submit']:hover { background-color: #45a049; }";
+            t.sendResponseHeaders(200, css.length());
+            OutputStream os = t.getResponseBody();
+            os.write(css.getBytes());
             os.close();
         }
     }
