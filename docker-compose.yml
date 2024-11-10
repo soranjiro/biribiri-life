@@ -1,0 +1,8 @@
+
+version: '3.8'
+
+services:
+  java-app:
+    build: .
+    ports:
+      - "8080:8080"
