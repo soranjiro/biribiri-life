@@ -40,9 +40,20 @@ public class Main {
             } else {
                 response = "Please provide a guess parameter, e.g., /?guess=50";
             }
-            t.sendResponseHeaders(200, response.length());
+
+            String htmlResponse = "<html><body>" +
+                    "<h1>Guess the Number Game</h1>" +
+                    "<p>" + response + "</p>" +
+                    "<form method='get' action='/'>" +
+                    "  <label for='guess'>Enter your guess:</label>" +
+                    "  <input type='number' id='guess' name='guess'>" +
+                    "  <input type='submit' value='Submit'>" +
+                    "</form>" +
+                    "</body></html>";
+
+            t.sendResponseHeaders(200, htmlResponse.length());
             OutputStream os = t.getResponseBody();
-            os.write(response.getBytes());
+            os.write(htmlResponse.getBytes());
             os.close();
         }
     }
