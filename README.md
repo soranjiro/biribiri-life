@@ -6,11 +6,10 @@ developed link: https://biribiri-life.onrender.com
 
 ## Start the project
 ```bash
-docker compose up
+docker compose up --build
 ```
 
 ## Stop the project
 ```bash
-docker compose down
 docker compose down --rmi all
 ```
