@@ -1,8 +1,7 @@
-
-version: '3.8'
-
 services:
-  java-app:
+  app:
+    image: biribiri-life
+    container_name: biribiri-life-container
     build: .
     ports:
       - "8080:8080"
