@@ -1,8 +1,0 @@
-services:
-  - type: web
-    name: java-app
-    runtime: docker
-    plan: free
-    dockerfilePath: ./Dockerfile
-    buildCommand: ""
-    startCommand: ""

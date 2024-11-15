@@ -1,7 +1,6 @@
 services:
-  app:
-    image: biribiri-life
-    container_name: biribiri-life-container
+  web:
     build: .
+    container_name: biribiri_life_web_container
     ports:
       - "8080:8080"
