@@ -23,7 +23,7 @@ public class GameApplication {
 class GameController {
     private final Player player = new Player(0, 0, 20);
     private final Goal goal = new Goal(780, 580, 20);
-    private final boolean[][] grid = new boolean[40][28];
+    private final boolean[][] grid = new boolean[40][30];
     private List<Obstacle> obstacles = new ArrayList<>();
 
     public GameController() {
@@ -70,52 +70,111 @@ class GameController {
                 setupStage2Obstacles();
                 break;
             default:
-                setupDefaultObstacles();
+                setupRandomObstacles(stage);
                 break;
         }
+        grid[0][0] = false;
         updateObstacles();
     }
 
     private void clearGrid() {
         for (int i = 0; i < 40; i++) {
-            for (int j = 0; j < 28; j++) {
+            for (int j = 0; j < 30; j++) {
                 grid[i][j] = false;
             }
         }
     }
 
+    private void initialPulsar(int x, int y) {
+        if (x < 0 || x+17 >= 40 || y < 0 || y+17 >= 30) {
+            return;
+        }
+        // パルサー
+        grid[x+10][y+10] = true;
+        grid[x+11][y+10] = true;
+        grid[x+12][y+10] = true;
+        grid[x+16][y+10] = true;
+        grid[x+17][y+10] = true;
+        grid[x+9][y+12] = true;
+        grid[x+13][y+12] = true;
+        grid[x+9][y+13] = true;
+        grid[x+13][y+13] = true;
+        grid[x+9][y+14] = true;
+        grid[x+13][y+14] = true;
+        grid[x+10][y+15] = true;
+        grid[x+10][y+16] = true;
+        grid[x+10][y+17] = true;
+    }
+
+    private void initialGosperGliderGun(int x, int y) {
+        if (x < 0 || x+36 >= 40 || y < 0 || y+9 >= 30) {
+            return;
+        }
+        // Gosper Glider Gun
+        grid[x+1][y+5] = true;
+        grid[x+2][y+5] = true;
+        grid[x+1][y+6] = true;
+        grid[x+2][y+6] = true;
+
+        grid[x+13][y+3] = true;
+        grid[x+14][y+3] = true;
+        grid[x+12][y+4] = true;
+        grid[x+16][y+4] = true;
+        grid[x+11][y+5] = true;
+        grid[x+17][y+5] = true;
+        grid[x+11][y+6] = true;
+        grid[x+15][y+6] = true;
+        grid[x+17][y+6] = true;
+        grid[x+18][y+6] = true;
+        grid[x+11][y+7] = true;
+        grid[x+17][y+7] = true;
+        grid[x+12][y+8] = true;
+        grid[x+16][y+8] = true;
+        grid[x+13][y+9] = true;
+        grid[x+14][y+9] = true;
+
+        grid[x+25][y+1] = true;
+        grid[x+23][y+2] = true;
+        grid[x+25][y+2] = true;
+        grid[x+21][y+3] = true;
+        grid[x+22][y+3] = true;
+        grid[x+21][y+4] = true;
+        grid[x+22][y+4] = true;
+        grid[x+21][y+5] = true;
+        grid[x+22][y+5] = true;
+        grid[x+23][y+6] = true;
+        grid[x+25][y+6] = true;
+        grid[x+25][y+7] = true;
+
+        grid[x+35][y+3] = true;
+        grid[x+36][y+3] = true;
+        grid[x+35][y+4] = true;
+        grid[x+36][y+4] = true;
+    }
+
     private void setupStage1Obstacles() {
-        grid[20][20] = true;
-        grid[21][21] = true;
-        grid[20][21] = true;
-        grid[21][20] = true;
-        // 他の障害物を追加
+        // ランダムにx, yを5パターン生成
+        Random random = new Random();
+        for (int i = 0; i < 5; i++) {
+            int x = random.nextInt(40-17);
+            int y = random.nextInt(30-17);
+            initialPulsar(x, y);
+        }
     }
 
     private void setupStage2Obstacles() {
-        // パルサー
-        grid[10][10] = true;
-        grid[11][10] = true;
-        grid[12][10] = true;
-        grid[16][10] = true;
-        grid[17][10] = true;
-        grid[9][12] = true;
-        grid[13][12] = true;
-        grid[9][13] = true;
-        grid[13][13] = true;
-        grid[9][14] = true;
-        grid[13][14] = true;
-        grid[10][15] = true;
-        grid[10][16] = true;
-        grid[10][17] = true;
+        int x = 2;
+        int y = 5;
+        // グライダー銃を生成
+        initialGosperGliderGun(x, y);
     }
 
-    private void setupDefaultObstacles() {
+    private void setupRandomObstacles(int stage) {
         Random random = new Random();
-        int numberOfObstacles = random.nextInt(50) + 1; // ランダムな個数の障害物を生成 (1から50)
+        int numberOfObstacles = random.nextInt(250 + stage*50) + 1; // ランダムな個数の障害物を生成
         for (int i = 0; i < numberOfObstacles; i++) {
             int x = random.nextInt(40);
-            int y = random.nextInt(28);
+            int y = random.nextInt(30);
             grid[x][y] = true;
         }
     }
@@ -123,9 +182,9 @@ class GameController {
     private void updateObstacles() {
         obstacles.clear();
         for (int i = 0; i < 40; i++) {
-            for (int j = 0; j < 28; j++) {
+            for (int j = 0; j < 30; j++) {
                 if (grid[i][j]) {
-                    obstacles.add(new Obstacle(i * 20, j * 20 + 20, 20, 20));
+                    obstacles.add(new Obstacle(i * 20, j * 20, 20, 20));
                 }
             }
         }
@@ -137,9 +196,9 @@ class GameController {
 
         obstacles.clear();
         for (int i = 0; i < 40; i++) {
-            for (int j = 0; j < 28; j++) {
+            for (int j = 0; j < 30; j++) {
                 if (grid[i][j]) {
-                    obstacles.add(new Obstacle(i * 20, j * 20 + 20, 20, 20));
+                    obstacles.add(new Obstacle(i * 20, j * 20, 20, 20));
                 }
             }
         }
@@ -157,7 +216,7 @@ class GameController {
                 int newCol = col + j;
 
                 // 境界チェック
-                if (newRow >= 0 && newRow < 40 && newCol >= 0 && newCol < 28) {
+                if (newRow >= 0 && newRow < 40 && newCol >= 0 && newCol < 30) {
                     if (grid[newRow][newCol]) {
                         count++;
                     }
@@ -169,15 +228,15 @@ class GameController {
 
     // ライフゲームの状態を1世代進めるメソッド
     private void nextGeneration() {
-        boolean[][] copyGrid = new boolean[40][28];
+        boolean[][] copyGrid = new boolean[40][30];
         for (int i = 0; i < 40; i++) {
-            for (int j = 0; j < 28; j++) {
+            for (int j = 0; j < 30; j++) {
                 copyGrid[i][j] = grid[i][j];
             }
         }
 
         for (int i = 0; i < 40; i++) {
-            for (int j = 0; j < 28; j++) {
+            for (int j = 0; j < 30; j++) {
                 int neighbors = countNeighbors(i, j, copyGrid);
 
                 // 生きているセルが過疎または過密な場合は死ぬ

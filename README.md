@@ -11,6 +11,5 @@ docker compose up
 
 ## Stop the project
 ```bash
-docker compose down
 docker compose down --rmi all
 ```
