@@ -13,7 +13,34 @@
     <div class="move-counter">移動回数: <span id="moveCount">0</span></div>
     <canvas id="gameCanvas" width="800" height="600"></canvas>
     <p>
-      スタートからゴールまでプレーヤーを動かし、障害物に当たらないようにしてください。
+      障害物を避けて，ゴールまでプレーヤーを動かしてください。
     </p>
+    <button id="infoButton" class="btn">詳細を見る</button>
+    <div id="infoModal" class="modal">
+      <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2 class="modal-title">遊び方</h2>
+        <ul>
+          <li>プレーヤー（<span class="blue-text">青</span>）を矢印キーで操作して下さい。</li>
+          <li>ゴール（<span class="green-text">緑</span>）にプレーヤーを移動させると次のステージに進みます。</li>
+          <li>障害物（<span class="red-text">赤</span>）に当たるとゲームオーバーです。</li>
+          <li>できるだけ少ない移動回数でゴールを目指してください。</li>
+        </ul>
+        <h2 class="modal-title">ゲーム背景</h2>
+        <ul>
+          <li>障害物（<span class="red-text">赤</span>）はある規則によって動いています。</li>
+          <li>詳細は <a href="https://www.google.com/search?q=Conway%27s+Game+of+Life&sourceid=chrome&ie=UTF-8">Conway's Game of Life</a> を調べてみて下さい</li>
+        </ul>
+        <h2 class="modal-title">最後に</h2>
+        <p>
+          "楽しんで"プレイしてください！
+        </p>
+        <a href="https://github.com/soranjiro/biribiri-life" target="_blank" rel="noopener" title="GitHub Repository">
+          <svg class="github-icon" viewBox="0 0 16 16" version="1.1" width="40" height="40" aria-hidden="true">
+            <path fill="#00796b" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path>
+          </svg>
+        </a>
+      </div>
+    </div>
   </body>
 </html>
