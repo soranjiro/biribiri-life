@@ -73,7 +73,7 @@ class GameController {
     }
 
     // 隣接するセルの数を数えるメソッド
-    private int countNeighbors(int row, int col) {
+    private int countNeighbors(int row, int col, boolean[][] grid) {
         int count = 0;
         for (int i = -1; i <= 1; i++) {
             for (int j = -1; j <= 1; j++) {
@@ -96,25 +96,27 @@ class GameController {
 
     // ライフゲームの状態を1世代進めるメソッド
     private void nextGeneration() {
-        boolean[][] newGrid = new boolean[40][30]; // 次の世代を保存する新しいグリッド
-
+        boolean[][] copyGrid = new boolean[40][28];
         for (int i = 0; i < 40; i++) {
             for (int j = 0; j < 28; j++) {
-                int neighbors = countNeighbors(i, j);
-
-                // 生きているセルが過疎または過密な場合は死ぬ
-                if (grid[i][j]) {
-                    newGrid[i][j] = (neighbors == 2 || neighbors == 3);
-                }
-                // 死んでいるセルがちょうど3つの生きたセルに囲まれている場合は生き返る
-                else {
-                    newGrid[i][j] = (neighbors == 3);
-                }
+                copyGrid[i][j] = grid[i][j];
             }
         }
 
-        // 新しいグリッドを現在のグリッドにコピー
-        grid = newGrid;
+        for (int i = 0; i < 40; i++) {
+            for (int j = 0; j < 28; j++) {
+                int neighbors = countNeighbors(i, j, copyGrid);
+
+                // 生きているセルが過疎または過密な場合は死ぬ
+                if (copyGrid[i][j]) {
+                    grid[i][j] = (neighbors == 2 || neighbors == 3);
+                }
+                // 死んでいるセルがちょうど3つの生きたセルに囲まれている場合は生き返る
+                else {
+                    grid[i][j] = (neighbors == 3);
+                }
+            }
+        }
     }
 
     private boolean checkCollision() {
