@@ -1,15 +1,19 @@
 <!DOCTYPE html>
 <html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Biribiri Life</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles.css" />
     <script src="gameControl.js" defer></script>
-</head>
-<body>
+  </head>
+  <body>
     <h1>Biribiri Life</h1>
+    <div class="stage">ステージ: <span id="stageNumber">1</span></div>
+    <div class="move-counter">移動回数: <span id="moveCount">0</span></div>
     <canvas id="gameCanvas" width="800" height="600"></canvas>
-    <p>スタートからゴールまでプレーヤーを動かし、障害物に当たらないようにしてください。</p>
-</body>
+    <p>
+      スタートからゴールまでプレーヤーを動かし、障害物に当たらないようにしてください。
+    </p>
+  </body>
 </html>

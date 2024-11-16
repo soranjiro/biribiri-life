@@ -6,9 +6,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 @SpringBootApplication
 public class GameApplication {
@@ -21,59 +23,197 @@ public class GameApplication {
 class GameController {
     private final Player player = new Player(0, 0, 20);
     private final Goal goal = new Goal(780, 580, 20);
-    private final boolean[][] grid = new boolean[40][28];
+    private final boolean[][] grid = new boolean[40][30];
+    private List<Obstacle> obstacles = new ArrayList<>();
 
     public GameController() {
-        for (int i = 0; i < 40; i++) {
-            for (int j = 0; j < 28; j++) {
-                grid[i][j] = false;
-            }
-        }
-        grid[10][10] = true;
-        grid[20][20] = true;
-        // 他の障害物を追加
+        setupObstacles(1);
     }
 
     @PostMapping("/game-data")
-    public GameData updatePlayer(@RequestBody Player newPlayer) {
+    public GameData updateGameData(@RequestBody Player newPlayer) {
+        String status = "playing";
         player.x = newPlayer.x;
         player.y = newPlayer.y;
 
         // 障害物の動きを更新しオブジェクトを生成
-        List<Obstacle> obstacles = nextObstacles();
+        nextObstacles();
 
         // 衝突チェック
         if (checkCollision()) {
-            resetGame();
-            return new GameData(player, goal, obstacles, "game-over");
+            status = "game-over";
         }
 
         // ゴールチェック
         if (checkGoal()) {
-            resetGame();
-            return new GameData(player, goal, obstacles, "game-clear");
+            status = "game-clear";
         }
 
+        return new GameData(player, goal, obstacles, status);
+    }
+
+    @GetMapping("/game-reset")
+    public GameData gameReset(@RequestParam int stage) {
+        player.x = 0;
+        player.y = 0;
+        setupObstacles(stage);
         return new GameData(player, goal, obstacles, "playing");
     }
 
-    private List<Obstacle> nextObstacles() {
-        // 障害物の動きを制御するロジックを追加
-        nextGeneration();
+    private void setupObstacles(int stage) {
+        clearGrid();
+        switch (stage) {
+            case 1:
+                setupStage1Obstacles();
+                break;
+            case 2:
+                setupStage2Obstacles();
+                break;
+            default:
+                setupRandomObstacles(250 + 50*stage);
+                break;
+        }
+        grid[0][0] = false;
+        updateObstacles();
+    }
 
-        List<Obstacle> obstacles = new ArrayList<>();
+    private void clearGrid() {
         for (int i = 0; i < 40; i++) {
-            for (int j = 0; j < 28; j++) {
+            for (int j = 0; j < 30; j++) {
+                grid[i][j] = false;
+            }
+        }
+    }
+
+    private void initialPulsar(int x, int y) {
+        if (x < 0 || x+17 >= 40 || y < 0 || y+17 >= 30) {
+            return;
+        }
+        // パルサー
+        grid[x+10][y+10] = true;
+        grid[x+11][y+10] = true;
+        grid[x+12][y+10] = true;
+        grid[x+16][y+10] = true;
+        grid[x+17][y+10] = true;
+        grid[x+9][y+12] = true;
+        grid[x+13][y+12] = true;
+        grid[x+9][y+13] = true;
+        grid[x+13][y+13] = true;
+        grid[x+9][y+14] = true;
+        grid[x+13][y+14] = true;
+        grid[x+10][y+15] = true;
+        grid[x+10][y+16] = true;
+        grid[x+10][y+17] = true;
+    }
+
+    private void initialGosperGliderGun(int x, int y) {
+        if (x < 0 || x+36 >= 40 || y < 0 || y+9 >= 30) {
+            return;
+        }
+        // Gosper Glider Gun
+        grid[x+1][y+5] = true;
+        grid[x+2][y+5] = true;
+        grid[x+1][y+6] = true;
+        grid[x+2][y+6] = true;
+
+        grid[x+13][y+3] = true;
+        grid[x+14][y+3] = true;
+        grid[x+12][y+4] = true;
+        grid[x+16][y+4] = true;
+        grid[x+11][y+5] = true;
+        grid[x+17][y+5] = true;
+        grid[x+11][y+6] = true;
+        grid[x+15][y+6] = true;
+        grid[x+17][y+6] = true;
+        grid[x+18][y+6] = true;
+        grid[x+11][y+7] = true;
+        grid[x+17][y+7] = true;
+        grid[x+12][y+8] = true;
+        grid[x+16][y+8] = true;
+        grid[x+13][y+9] = true;
+        grid[x+14][y+9] = true;
+
+        grid[x+25][y+1] = true;
+        grid[x+23][y+2] = true;
+        grid[x+25][y+2] = true;
+        grid[x+21][y+3] = true;
+        grid[x+22][y+3] = true;
+        grid[x+21][y+4] = true;
+        grid[x+22][y+4] = true;
+        grid[x+21][y+5] = true;
+        grid[x+22][y+5] = true;
+        grid[x+23][y+6] = true;
+        grid[x+25][y+6] = true;
+        grid[x+25][y+7] = true;
+
+        grid[x+35][y+3] = true;
+        grid[x+36][y+3] = true;
+        grid[x+35][y+4] = true;
+        grid[x+36][y+4] = true;
+    }
+
+    private void setupStage1Obstacles() {
+        // ランダムにx, yを5パターン生成
+        Random random = new Random();
+        for (int i = 0; i < 5; i++) {
+            int x = random.nextInt(40-17);
+            int y = random.nextInt(30-17);
+            initialPulsar(x, y);
+        }
+    }
+
+    private void setupStage2Obstacles() {
+        int x = 2;
+        int y = 5;
+        // グライダー銃を生成
+        initialGosperGliderGun(x, y);
+    }
+
+    private void setupRandomObstacles(int num_obstacles) {
+        Random random = new Random();
+        int numberOfObstacles = random.nextInt(num_obstacles) + 1; // ランダムな個数の障害物を生成
+        for (int i = 0; i < numberOfObstacles; i++) {
+            int x = random.nextInt(40);
+            int y = random.nextInt(30);
+            grid[x][y] = true;
+        }
+    }
+
+    private void updateObstacles() {
+        obstacles.clear();
+        for (int i = 0; i < 40; i++) {
+            for (int j = 0; j < 30; j++) {
                 if (grid[i][j]) {
-                    obstacles.add(new Obstacle(i * 20, j * 20 + 20, 20, 20));
+                    obstacles.add(new Obstacle(i * 20, j * 20, 20, 20));
                 }
             }
         }
-        return obstacles;
+    }
+
+    private void nextObstacles() {
+        // 障害物の動きを制御するロジックを追加
+        nextGeneration();
+
+        obstacles.clear();
+        for (int i = 0; i < 40; i++) {
+            for (int j = 0; j < 30; j++) {
+                if (grid[i][j]) {
+                    obstacles.add(new Obstacle(i * 20, j * 20, 20, 20));
+                }
+            }
+        }
+
+        // 障害物がなくなった場合は新たに生成
+        if (obstacles.size() == 0) {
+            setupRandomObstacles(250);
+            if (checkCollision()) {
+                setupRandomObstacles(250);
+            }
+        }
     }
 
     // 隣接するセルの数を数えるメソッド
-    private int countNeighbors(int row, int col) {
+    private int countNeighbors(int row, int col, boolean[][] grid) {
         int count = 0;
         for (int i = -1; i <= 1; i++) {
             for (int j = -1; j <= 1; j++) {
@@ -84,7 +224,7 @@ class GameController {
                 int newCol = col + j;
 
                 // 境界チェック
-                if (newRow >= 0 && newRow < 40 && newCol >= 0 && newCol < 28) {
+                if (newRow >= 0 && newRow < 40 && newCol >= 0 && newCol < 30) {
                     if (grid[newRow][newCol]) {
                         count++;
                     }
@@ -96,25 +236,27 @@ class GameController {
 
     // ライフゲームの状態を1世代進めるメソッド
     private void nextGeneration() {
-        boolean[][] newGrid = new boolean[40][30]; // 次の世代を保存する新しいグリッド
-
+        boolean[][] copyGrid = new boolean[40][30];
         for (int i = 0; i < 40; i++) {
-            for (int j = 0; j < 28; j++) {
-                int neighbors = countNeighbors(i, j);
-
-                // 生きているセルが過疎または過密な場合は死ぬ
-                if (grid[i][j]) {
-                    newGrid[i][j] = (neighbors == 2 || neighbors == 3);
-                }
-                // 死んでいるセルがちょうど3つの生きたセルに囲まれている場合は生き返る
-                else {
-                    newGrid[i][j] = (neighbors == 3);
-                }
+            for (int j = 0; j < 30; j++) {
+                copyGrid[i][j] = grid[i][j];
             }
         }
 
-        // 新しいグリッドを現在のグリッドにコピー
-        grid = newGrid;
+        for (int i = 0; i < 40; i++) {
+            for (int j = 0; j < 30; j++) {
+                int neighbors = countNeighbors(i, j, copyGrid);
+
+                // 生きているセルが過疎または過密な場合は死ぬ
+                if (copyGrid[i][j]) {
+                    grid[i][j] = (neighbors == 2 || neighbors == 3);
+                }
+                // 死んでいるセルがちょうど3つの生きたセルに囲まれている場合は生き返る
+                else {
+                    grid[i][j] = (neighbors == 3);
+                }
+            }
+        }
     }
 
     private boolean checkCollision() {
@@ -136,14 +278,6 @@ class GameController {
                player.y + player.size > goal.y;
     }
 
-    private void resetGame() {
-        player.x = 0;
-        player.y = 0;
-        obstacles.clear();
-        obstacles.add(new Obstacle(100, 100, 100, 20));
-        obstacles.add(new Obstacle(300, 200, 20, 100));
-        // 他の障害物を追加
-    }
 }
 
 class Player {
