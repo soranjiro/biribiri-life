@@ -22,12 +22,29 @@ public class GameApplication {
 class GameController {
     private final Player player = new Player(0, 0, 20);
     private final Goal goal = new Goal(780, 580, 20);
-    private final List<Obstacle> obstacles = new ArrayList<>();
+    private final boolean[][] grid = new boolean[40][28];
+    private List<Obstacle> obstacles = new ArrayList<>();
 
     public GameController() {
-        obstacles.add(new Obstacle(100, 100, 100, 20));
-        obstacles.add(new Obstacle(300, 200, 20, 100));
+        for (int i = 0; i < 40; i++) {
+            for (int j = 0; j < 28; j++) {
+                grid[i][j] = false;
+            }
+        }
+        grid[10][10] = true;
+        grid[11][11] = true;
+        grid[10][11] = true;
+        grid[11][10] = true;
         // 他の障害物を追加
+
+        obstacles.clear();
+        for (int i = 0; i < 40; i++) {
+            for (int j = 0; j < 28; j++) {
+                if (grid[i][j]) {
+                    obstacles.add(new Obstacle(i * 20, j * 20 + 20, 20, 20));
+                }
+            }
+        }
     }
 
     @PostMapping("/game-data")
@@ -36,8 +53,8 @@ class GameController {
         player.x = newPlayer.x;
         player.y = newPlayer.y;
 
-        // 障害物の動きを更新
-        updateObstacles();
+        // 障害物の動きを更新しオブジェクトを生成
+        nextObstacles();
 
         // 衝突チェック
         if (checkCollision()) {
@@ -61,29 +78,64 @@ class GameController {
         return new GameData(player, goal, obstacles, "playing");
     }
 
-    private void setupObstacles(int stage) {
-        switch (stage) {
-            case 1:
-                obstacles.add(new Obstacle(100, 100, 100, 20));
-                obstacles.add(new Obstacle(300, 200, 20, 100));
-                break;
-            case 2:
-                obstacles.add(new Obstacle(150, 150, 100, 20));
-                obstacles.add(new Obstacle(350, 250, 20, 100));
-                obstacles.add(new Obstacle(500, 300, 50, 50));
-                break;
-            // 他のステージの障害物を追加
-            default:
-                obstacles.add(new Obstacle(100, 100, 100, 20));
-                obstacles.add(new Obstacle(300, 200, 20, 100));
-                break;
+    private void nextObstacles() {
+        // 障害物の動きを制御するロジックを追加
+        nextGeneration();
+
+        obstacles.clear();
+        for (int i = 0; i < 40; i++) {
+            for (int j = 0; j < 28; j++) {
+                if (grid[i][j]) {
+                    obstacles.add(new Obstacle(i * 20, j * 20 + 20, 20, 20));
+                }
+            }
         }
     }
 
-    private void updateObstacles() {
-        // 障害物の動きを制御するロジックを追加
-        for (Obstacle obstacle : obstacles) {
-            obstacle.move();
+    // 隣接するセルの数を数えるメソッド
+    private int countNeighbors(int row, int col, boolean[][] grid) {
+        int count = 0;
+        for (int i = -1; i <= 1; i++) {
+            for (int j = -1; j <= 1; j++) {
+                // 自分自身を除外
+                if (i == 0 && j == 0) continue;
+
+                int newRow = row + i;
+                int newCol = col + j;
+
+                // 境界チェック
+                if (newRow >= 0 && newRow < 40 && newCol >= 0 && newCol < 28) {
+                    if (grid[newRow][newCol]) {
+                        count++;
+                    }
+                }
+            }
+        }
+        return count;
+    }
+
+    // ライフゲームの状態を1世代進めるメソッド
+    private void nextGeneration() {
+        boolean[][] copyGrid = new boolean[40][28];
+        for (int i = 0; i < 40; i++) {
+            for (int j = 0; j < 28; j++) {
+                copyGrid[i][j] = grid[i][j];
+            }
+        }
+
+        for (int i = 0; i < 40; i++) {
+            for (int j = 0; j < 28; j++) {
+                int neighbors = countNeighbors(i, j, copyGrid);
+
+                // 生きているセルが過疎または過密な場合は死ぬ
+                if (copyGrid[i][j]) {
+                    grid[i][j] = (neighbors == 2 || neighbors == 3);
+                }
+                // 死んでいるセルがちょうど3つの生きたセルに囲まれている場合は生き返る
+                else {
+                    grid[i][j] = (neighbors == 3);
+                }
+            }
         }
     }
 
@@ -128,19 +180,11 @@ class Goal {
 
 class Obstacle {
     public int x, y, width, height;
-    private int dx = 20; // 障害物の移動速度
     public Obstacle(int x, int y, int width, int height) {
         this.x = x;
         this.y = y;
         this.width = width;
         this.height = height;
-    }
-
-    public void move() {
-        x += dx;
-        if (x < 0 || x + width > 800) {
-            dx = -dx; // 画面端で反転
-        }
     }
 }
 
