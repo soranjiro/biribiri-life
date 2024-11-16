@@ -144,5 +144,24 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  // モーダル画面の制御
+  const infoButton = document.getElementById("infoButton");
+  const infoModal = document.getElementById("infoModal");
+  const closeModal = document.querySelector(".close");
+
+  infoButton.addEventListener("click", () => {
+    infoModal.style.display = "block";
+  });
+
+  closeModal.addEventListener("click", () => {
+    infoModal.style.display = "none";
+  });
+
+  window.addEventListener("click", (event) => {
+    if (event.target == infoModal) {
+      infoModal.style.display = "none";
+    }
+  });
+
   resetGame();
 });
