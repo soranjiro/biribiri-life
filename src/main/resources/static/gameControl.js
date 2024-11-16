@@ -71,13 +71,13 @@ document.addEventListener("DOMContentLoaded", () => {
         // ゲームオーバーまたはゲームクリアのアラートを表示
         let alertMessage = "";
         if (data.status === "game-over") {
-          alertMessage = "ゲームオーバー";
+          alertMessage = "ゲームオーバー！\n\n" + moveCount + "回も動いたのにね。\n\n悲しいね";
         }
         else if (moveCount > 68) {
-          alertMessage = "ゲームクリア！\n\n" + moveCount + "手でクリアしました！\n\nでももう少し早くクリアできるよね？";
+          alertMessage = "ゲームクリア！\n\n" + moveCount + "回の移動でクリアしました！\n\nでももう少し早くクリアできるよね？";
         }
         else {
-          alertMessage = "ゲームクリア！\n\n" + moveCount + "手でクリアしました！\n\nすごい！";
+          alertMessage = "ゲームクリア！\n\n" + moveCount + "回の移動でクリアしました！\n\nすごい！";
         }
         alert(alertMessage);
 

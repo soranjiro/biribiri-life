@@ -70,7 +70,7 @@ class GameController {
                 setupStage2Obstacles();
                 break;
             default:
-                setupRandomObstacles(stage);
+                setupRandomObstacles(250 + 50*stage);
                 break;
         }
         grid[0][0] = false;
@@ -164,14 +164,14 @@ class GameController {
 
     private void setupStage2Obstacles() {
         int x = 2;
-        int y = 5;
+        int y = 13;
         // グライダー銃を生成
         initialGosperGliderGun(x, y);
     }
 
-    private void setupRandomObstacles(int stage) {
+    private void setupRandomObstacles(int num_obstacles) {
         Random random = new Random();
-        int numberOfObstacles = random.nextInt(250 + stage*50) + 1; // ランダムな個数の障害物を生成
+        int numberOfObstacles = random.nextInt(num_obstacles) + 1; // ランダムな個数の障害物を生成
         for (int i = 0; i < numberOfObstacles; i++) {
             int x = random.nextInt(40);
             int y = random.nextInt(30);
@@ -200,6 +200,14 @@ class GameController {
                 if (grid[i][j]) {
                     obstacles.add(new Obstacle(i * 20, j * 20, 20, 20));
                 }
+            }
+        }
+
+        // 障害物がなくなった場合は新たに生成
+        if (obstacles.size() == 0) {
+            setupRandomObstacles(250);
+            if (checkCollision()) {
+                setupRandomObstacles(250);
             }
         }
     }
