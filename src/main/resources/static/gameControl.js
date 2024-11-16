@@ -29,33 +29,24 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     function updatePlayerPosition() {
-        fetch("/update-player", {
+        fetch("/game-data", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify(player)
-        }).catch(error => console.error("Error updating player position:", error));
-    }
-
-    function fetchGameData() {
-        fetch("/game-data")
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error("Network response was not ok");
-                }
-                return response.json();
-            })
-            .then(data => {
-                if (data.status === "game-over" || data.status === "game-clear") {
-                    alert(data.status === "game-over" ? "ゲームオーバー" : "ゲームクリア");
-                    resetGame();
-                    return;
-                }
-                player = data.player;
-                drawGame(data);
-            })
-            .catch(error => console.error("Error fetching game data:", error));
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === "game-over" || data.status === "game-clear") {
+                alert(data.status === "game-over" ? "ゲームオーバー" : "ゲームクリア");
+                resetGame();
+                return;
+            }
+            player = data.player;
+            drawGame(data);
+        })
+        .catch(error => console.error("Error updating player position:", error));
     }
 
     function resetGame() {
@@ -80,5 +71,4 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    setInterval(fetchGameData, 100); // 100ミリ秒ごとにゲームデータを取得
 });

@@ -29,8 +29,11 @@ class GameController {
         // 他の障害物を追加
     }
 
-    @GetMapping("/game-data")
-    public GameData getGameData() {
+    @PostMapping("/game-data")
+    public GameData updatePlayer(@RequestBody Player newPlayer) {
+        player.x = newPlayer.x;
+        player.y = newPlayer.y;
+
         // 障害物の動きを更新
         updateObstacles();
 
@@ -47,12 +50,6 @@ class GameController {
         }
 
         return new GameData(player, goal, obstacles, "playing");
-    }
-
-    @PostMapping("/update-player")
-    public void updatePlayer(@RequestBody Player newPlayer) {
-        player.x = newPlayer.x;
-        player.y = newPlayer.y;
     }
 
     private void updateObstacles() {
