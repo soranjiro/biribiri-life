@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -52,15 +53,31 @@ class GameController {
     }
 
     @GetMapping("/game-reset")
-    public GameData resetGame() {
+    public GameData gameReset(@RequestParam int stage) {
         player.x = 0;
         player.y = 0;
         obstacles.clear();
-        obstacles.add(new Obstacle(100, 100, 100, 20));
-        obstacles.add(new Obstacle(300, 200, 20, 100));
-        // 他の障害物を追加
-
+        setupObstacles(stage);
         return new GameData(player, goal, obstacles, "playing");
+    }
+
+    private void setupObstacles(int stage) {
+        switch (stage) {
+            case 1:
+                obstacles.add(new Obstacle(100, 100, 100, 20));
+                obstacles.add(new Obstacle(300, 200, 20, 100));
+                break;
+            case 2:
+                obstacles.add(new Obstacle(150, 150, 100, 20));
+                obstacles.add(new Obstacle(350, 250, 20, 100));
+                obstacles.add(new Obstacle(500, 300, 50, 50));
+                break;
+            // 他のステージの障害物を追加
+            default:
+                obstacles.add(new Obstacle(100, 100, 100, 20));
+                obstacles.add(new Obstacle(300, 200, 20, 100));
+                break;
+        }
     }
 
     private void updateObstacles() {

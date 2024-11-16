@@ -1,4 +1,3 @@
-
 body {
     display: flex;
     flex-direction: column;
@@ -20,4 +19,10 @@ canvas {
 
 p {
     color: #666;
+}
+
+.stage {
+    font-size: 18px;
+    color: #333;
+    margin-bottom: 10px;
 }

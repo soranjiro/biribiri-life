@@ -3,6 +3,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const ctx = canvas.getContext("2d");
     let player = { x: 0, y: 0, size: 20 };
     let isRequestInProgress = false;
+    let stage = 1;
+    const stageNumberElement = document.getElementById("stageNumber");
 
     document.addEventListener("keydown", function(event) {
         if (isRequestInProgress) return;
@@ -47,6 +49,12 @@ document.addEventListener("DOMContentLoaded", () => {
             if (data.status === "game-over" || data.status === "game-clear") {
                 await new Promise(resolve => setTimeout(resolve, 250));
                 alert(data.status === "game-over" ? "ゲームオーバー" : "ゲームクリア");
+                if (data.status === "game-over") {
+                    stage = 1;
+                } else {
+                    stage++;
+                }
+                stageNumberElement.textContent = stage;
                 await resetGame();
             }
         } catch (error) {
@@ -58,7 +66,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     async function resetGame() {
         try {
-            const response = await fetch("/game-reset", {
+            const response = await fetch(`/game-reset?stage=${stage}`, {
                 method: "GET"
             });
             const data = await response.json();
