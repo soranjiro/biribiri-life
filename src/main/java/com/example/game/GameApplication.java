@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 @SpringBootApplication
 public class GameApplication {
@@ -26,25 +27,7 @@ class GameController {
     private List<Obstacle> obstacles = new ArrayList<>();
 
     public GameController() {
-        for (int i = 0; i < 40; i++) {
-            for (int j = 0; j < 28; j++) {
-                grid[i][j] = false;
-            }
-        }
-        grid[10][10] = true;
-        grid[11][11] = true;
-        grid[10][11] = true;
-        grid[11][10] = true;
-        // 他の障害物を追加
-
-        obstacles.clear();
-        for (int i = 0; i < 40; i++) {
-            for (int j = 0; j < 28; j++) {
-                if (grid[i][j]) {
-                    obstacles.add(new Obstacle(i * 20, j * 20 + 20, 20, 20));
-                }
-            }
-        }
+        setupObstacles(1);
     }
 
     @PostMapping("/game-data")
@@ -73,9 +56,79 @@ class GameController {
     public GameData gameReset(@RequestParam int stage) {
         player.x = 0;
         player.y = 0;
-        obstacles.clear();
         setupObstacles(stage);
         return new GameData(player, goal, obstacles, "playing");
+    }
+
+    private void setupObstacles(int stage) {
+        clearGrid();
+        switch (stage) {
+            case 1:
+                setupStage1Obstacles();
+                break;
+            case 2:
+                setupStage2Obstacles();
+                break;
+            default:
+                setupDefaultObstacles();
+                break;
+        }
+        updateObstacles();
+    }
+
+    private void clearGrid() {
+        for (int i = 0; i < 40; i++) {
+            for (int j = 0; j < 28; j++) {
+                grid[i][j] = false;
+            }
+        }
+    }
+
+    private void setupStage1Obstacles() {
+        grid[20][20] = true;
+        grid[21][21] = true;
+        grid[20][21] = true;
+        grid[21][20] = true;
+        // 他の障害物を追加
+    }
+
+    private void setupStage2Obstacles() {
+        // パルサー
+        grid[10][10] = true;
+        grid[11][10] = true;
+        grid[12][10] = true;
+        grid[16][10] = true;
+        grid[17][10] = true;
+        grid[9][12] = true;
+        grid[13][12] = true;
+        grid[9][13] = true;
+        grid[13][13] = true;
+        grid[9][14] = true;
+        grid[13][14] = true;
+        grid[10][15] = true;
+        grid[10][16] = true;
+        grid[10][17] = true;
+    }
+
+    private void setupDefaultObstacles() {
+        Random random = new Random();
+        int numberOfObstacles = random.nextInt(50) + 1; // ランダムな個数の障害物を生成 (1から50)
+        for (int i = 0; i < numberOfObstacles; i++) {
+            int x = random.nextInt(40);
+            int y = random.nextInt(28);
+            grid[x][y] = true;
+        }
+    }
+
+    private void updateObstacles() {
+        obstacles.clear();
+        for (int i = 0; i < 40; i++) {
+            for (int j = 0; j < 28; j++) {
+                if (grid[i][j]) {
+                    obstacles.add(new Obstacle(i * 20, j * 20 + 20, 20, 20));
+                }
+            }
+        }
     }
 
     private void nextObstacles() {
