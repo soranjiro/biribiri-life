@@ -22,6 +22,7 @@ class GameController {
     private final Player player = new Player(0, 0, 20);
     private final Goal goal = new Goal(780, 580, 20);
     private final boolean[][] grid = new boolean[40][28];
+    private List<Obstacle> obstacles = new ArrayList<>();
 
     public GameController() {
         for (int i = 0; i < 40; i++) {
@@ -30,8 +31,19 @@ class GameController {
             }
         }
         grid[10][10] = true;
-        grid[20][20] = true;
+        grid[11][11] = true;
+        grid[10][11] = true;
+        grid[11][10] = true;
         // 他の障害物を追加
+
+        obstacles.clear();
+        for (int i = 0; i < 40; i++) {
+            for (int j = 0; j < 28; j++) {
+                if (grid[i][j]) {
+                    obstacles.add(new Obstacle(i * 20, j * 20 + 20, 20, 20));
+                }
+            }
+        }
     }
 
     @PostMapping("/game-data")
@@ -40,7 +52,7 @@ class GameController {
         player.y = newPlayer.y;
 
         // 障害物の動きを更新しオブジェクトを生成
-        List<Obstacle> obstacles = nextObstacles();
+        nextObstacles();
 
         // 衝突チェック
         if (checkCollision()) {
@@ -57,11 +69,11 @@ class GameController {
         return new GameData(player, goal, obstacles, "playing");
     }
 
-    private List<Obstacle> nextObstacles() {
+    private void nextObstacles() {
         // 障害物の動きを制御するロジックを追加
         nextGeneration();
 
-        List<Obstacle> obstacles = new ArrayList<>();
+        obstacles.clear();
         for (int i = 0; i < 40; i++) {
             for (int j = 0; j < 28; j++) {
                 if (grid[i][j]) {
@@ -69,7 +81,6 @@ class GameController {
                 }
             }
         }
-        return obstacles;
     }
 
     // 隣接するセルの数を数えるメソッド
