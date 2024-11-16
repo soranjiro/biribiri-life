@@ -50,14 +50,14 @@ document.addEventListener("DOMContentLoaded", () => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(player),
+        body: JSON.stringify({ player, moveCount }),
       });
       const data = await response.json();
       player = data.player;
       await drawGame(data);
 
       // ゲームオーバーまたはゲームクリアの場合
-      if (data.status === "game-over" || data.status === "game-clear") {
+      if (data.status === "game-over" || data.status === "game-clear" || data.status === "retry") {
         // ヒットストップ
         for (let i = 0; i < 3; i++) {
           ctx.fillStyle = "pink";
@@ -69,34 +69,13 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         // ゲームオーバーまたはゲームクリアのアラートを表示
-        let alertMessage = "";
-        if (data.status === "game-over") {
-          if (moveCount < 68) {
-            alertMessage = "ゲームオーバー！\n\n" + moveCount + "回しか動いてないのにね。\n\n悲しいね";
-          }
-          else {
-            alertMessage = "ゲームオーバー！\n\n" + moveCount + "回の移動でクリアできなかったね。\n\nすごい悲しいね";
-          }
-        }
-        else if (moveCount >= 68*2) {
-          for (let i = 2; i < 5; i++) {
-            if (moveCount <= 68 * i) {
-              alertMessage = "ゲームクリア！\n\n" + moveCount + "回の移動でクリアしました！\n\nでも，最小回数の" + i-1 + "倍以上かかったね。\n正直ビビっちゃったね。";
-              break;
-            }
-          }
-        }
-        else if (moveCount > 68) {
-          alertMessage = "ゲームクリア！\n\n" + moveCount + "回の移動でクリアしました！\n\nでも，もうちょっと早くクリアできるよね？？";
-        }
-        else {
-          alertMessage = "ゲームクリア！\n\n" + moveCount + "回の移動でクリアしました！\n\nすごい！";
-        }
-        alert(alertMessage);
+        alert(data.alertMessage);
 
         // ゲームリセット
         if (data.status === "game-over") {
           stage = 1;
+        } else if (data.status === "retry") {
+          // ステージ変更なし
         } else {
           stage++;
         }

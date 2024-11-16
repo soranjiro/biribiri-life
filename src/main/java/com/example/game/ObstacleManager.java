@@ -55,6 +55,29 @@ public class ObstacleManager {
         return false;
     }
 
+
+    // 2回障害物を動かして，現在の位置と同じかどうかをチェック
+    public boolean checkObstaclePosition() {
+        boolean[][] copyGrid = new boolean[40][30];
+        for (int i = 0; i < 40; i++) {
+            for (int j = 0; j < 30; j++) {
+                copyGrid[i][j] = grid[i][j];
+            }
+        }
+
+        nextGeneration();
+        nextGeneration();
+
+        for (int i = 0; i < 40; i++) {
+            for (int j = 0; j < 30; j++) {
+                if (copyGrid[i][j] != grid[i][j]) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
     public List<Obstacle> getObstacles() {
         return obstacles;
     }
