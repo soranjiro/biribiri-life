@@ -4,6 +4,8 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,15 +36,23 @@ class GameController {
 
         // 衝突チェック
         if (checkCollision()) {
+            resetGame();
             return new GameData(player, goal, obstacles, "game-over");
         }
 
         // ゴールチェック
         if (checkGoal()) {
+            resetGame();
             return new GameData(player, goal, obstacles, "game-clear");
         }
 
         return new GameData(player, goal, obstacles, "playing");
+    }
+
+    @PostMapping("/update-player")
+    public void updatePlayer(@RequestBody Player newPlayer) {
+        player.x = newPlayer.x;
+        player.y = newPlayer.y;
     }
 
     private void updateObstacles() {
@@ -70,6 +80,15 @@ class GameController {
                player.y < goal.y + goal.size &&
                player.y + player.size > goal.y;
     }
+
+    private void resetGame() {
+        player.x = 0;
+        player.y = 0;
+        obstacles.clear();
+        obstacles.add(new Obstacle(100, 100, 100, 20));
+        obstacles.add(new Obstacle(300, 200, 20, 100));
+        // 他の障害物を追加
+    }
 }
 
 class Player {
@@ -92,7 +111,7 @@ class Goal {
 
 class Obstacle {
     public int x, y, width, height;
-    private int dx = 1; // 障害物の移動速度
+    private int dx = 20; // 障害物の移動速度
     public Obstacle(int x, int y, int width, int height) {
         this.x = x;
         this.y = y;

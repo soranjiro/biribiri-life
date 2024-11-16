@@ -3,38 +3,63 @@ document.addEventListener("DOMContentLoaded", () => {
     const ctx = canvas.getContext("2d");
     let player = { x: 0, y: 0, size: 20 };
 
-    document.addEventListener("keydown", (event) => {
+    document.addEventListener("keydown", function(event) {
+        let positionChanged = false;
         switch (event.key) {
             case "ArrowUp":
                 player.y = Math.max(0, player.y - 20);
+                positionChanged = true;
                 break;
             case "ArrowDown":
                 player.y = Math.min(canvas.height - player.size, player.y + 20);
+                positionChanged = true;
                 break;
             case "ArrowLeft":
                 player.x = Math.max(0, player.x - 20);
+                positionChanged = true;
                 break;
             case "ArrowRight":
                 player.x = Math.min(canvas.width - player.size, player.x + 20);
+                positionChanged = true;
                 break;
+        }
+        if (positionChanged) {
+            updatePlayerPosition();
         }
     });
 
+    function updatePlayerPosition() {
+        fetch("/update-player", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(player)
+        }).catch(error => console.error("Error updating player position:", error));
+    }
+
     function fetchGameData() {
         fetch("/game-data")
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("Network response was not ok");
+                }
+                return response.json();
+            })
             .then(data => {
-                if (data.status === "game-over") {
-                    alert("ゲームオーバー");
+                if (data.status === "game-over" || data.status === "game-clear") {
+                    alert(data.status === "game-over" ? "ゲームオーバー" : "ゲームクリア");
+                    resetGame();
                     return;
                 }
-                if (data.status === "game-clear") {
-                    alert("ゲームクリア");
-                    return;
-                }
+                player = data.player;
                 drawGame(data);
             })
             .catch(error => console.error("Error fetching game data:", error));
+    }
+
+    function resetGame() {
+        player = { x: 0, y: 0, size: 20 };
     }
 
     function drawGame(data) {
