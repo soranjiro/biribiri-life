@@ -2,8 +2,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
     let player = { x: 0, y: 0, size: 20 };
+    let isRequestInProgress = false;
 
     document.addEventListener("keydown", function(event) {
+        if (isRequestInProgress) return;
+
         let positionChanged = false;
         switch (event.key) {
             case "ArrowUp":
@@ -24,41 +27,50 @@ document.addEventListener("DOMContentLoaded", () => {
                 break;
         }
         if (positionChanged) {
-            updatePlayerPosition();
+            getGameData();
         }
     });
 
-    function updatePlayerPosition() {
-        fetch("/game-data", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(player)
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.status === "game-over" || data.status === "game-clear") {
-                alert(data.status === "game-over" ? "ゲームオーバー" : "ゲームクリア");
-                resetGame();
-                return;
-            }
+    async function getGameData() {
+        isRequestInProgress = true;
+        try {
+            const response = await fetch("/game-data", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(player)
+            });
+            const data = await response.json();
             player = data.player;
-            drawGame(data);
-        })
-        .catch(error => console.error("Error updating player position:", error));
+            await drawGame(data);
+            if (data.status === "game-over" || data.status === "game-clear") {
+                await new Promise(resolve => setTimeout(resolve, 250));
+                alert(data.status === "game-over" ? "ゲームオーバー" : "ゲームクリア");
+                await resetGame();
+            }
+        } catch (error) {
+            console.error("Error fetching game data:", error);
+        } finally {
+            isRequestInProgress = false;
+        }
     }
 
-    function resetGame() {
-        player = { x: 0, y: 0, size: 20 };
+    async function resetGame() {
+        try {
+            const response = await fetch("/game-reset", {
+                method: "GET"
+            });
+            const data = await response.json();
+            player = data.player;
+            await drawGame(data);
+        } catch (error) {
+            console.error("Error resetting game:", error);
+        }
     }
 
-    function drawGame(data) {
+    async function drawGame(data) {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-        // プレーヤーを描画
-        ctx.fillStyle = "blue";
-        ctx.fillRect(player.x, player.y, player.size, player.size);
 
         // ゴールを描画
         ctx.fillStyle = "green";
@@ -69,6 +81,11 @@ document.addEventListener("DOMContentLoaded", () => {
         data.obstacles.forEach(obstacle => {
             ctx.fillRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
         });
+
+        // プレーヤーを描画
+        ctx.fillStyle = "blue";
+        ctx.fillRect(player.x, player.y, player.size, player.size);
     }
 
+    resetGame();
 });

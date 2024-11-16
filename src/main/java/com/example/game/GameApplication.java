@@ -30,7 +30,8 @@ class GameController {
     }
 
     @PostMapping("/game-data")
-    public GameData updatePlayer(@RequestBody Player newPlayer) {
+    public GameData updateGameData(@RequestBody Player newPlayer) {
+        String status = "playing";
         player.x = newPlayer.x;
         player.y = newPlayer.y;
 
@@ -39,15 +40,25 @@ class GameController {
 
         // 衝突チェック
         if (checkCollision()) {
-            resetGame();
-            return new GameData(player, goal, obstacles, "game-over");
+            status = "game-over";
         }
 
         // ゴールチェック
         if (checkGoal()) {
-            resetGame();
-            return new GameData(player, goal, obstacles, "game-clear");
+            status = "game-clear";
         }
+
+        return new GameData(player, goal, obstacles, status);
+    }
+
+    @GetMapping("/game-reset")
+    public GameData resetGame() {
+        player.x = 0;
+        player.y = 0;
+        obstacles.clear();
+        obstacles.add(new Obstacle(100, 100, 100, 20));
+        obstacles.add(new Obstacle(300, 200, 20, 100));
+        // 他の障害物を追加
 
         return new GameData(player, goal, obstacles, "playing");
     }
@@ -78,14 +89,6 @@ class GameController {
                player.y + player.size > goal.y;
     }
 
-    private void resetGame() {
-        player.x = 0;
-        player.y = 0;
-        obstacles.clear();
-        obstacles.add(new Obstacle(100, 100, 100, 20));
-        obstacles.add(new Obstacle(300, 200, 20, 100));
-        // 他の障害物を追加
-    }
 }
 
 class Player {
