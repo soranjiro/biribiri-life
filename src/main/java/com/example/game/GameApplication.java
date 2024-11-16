@@ -164,7 +164,7 @@ class GameController {
 
     private void setupStage2Obstacles() {
         int x = 2;
-        int y = 13;
+        int y = 5;
         // グライダー銃を生成
         initialGosperGliderGun(x, y);
     }
